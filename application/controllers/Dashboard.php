@@ -46,28 +46,47 @@ class Dashboard extends CI_Controller
         }
     }
 
+    // Fungsi AJAX untuk menyimpan atau memperbarui user
     public function ajax_save()
     {
+        $id = $this->input->post('id');
         $username = $this->input->post('username');
         $password = $this->input->post('password');
 
-        // Validasi: username harus unik
-        $exists = $this->User_model->getUserByUsername($username);
-        if ($exists->num_rows() > 0) {
-            echo json_encode(['status' => false, 'message' => 'Username sudah digunakan']);
-            return;
+        if ($id) {
+            // Jika ada ID, lakukan update
+            $data = ['username' => $username, 'password' => $password];
+            $this->User_model->updateUser($id, $data);
+            echo json_encode([
+                'status' => true,
+                'message' => 'User berhasil diperbarui',
+                'id' => $id,
+                'username' => $username,
+                'password' => $password
+            ]);
+        } else {
+            // Jika tidak ada ID, lakukan insert (tambah user baru)
+            $exists = $this->User_model->getUserByUsername($username);
+            if ($exists->num_rows() > 0) {
+                echo json_encode(['status' => false, 'message' => 'Username sudah digunakan']);
+                return;
+            }
+
+            $data = ['username' => $username, 'password' => $password];
+            $insert = $this->User_model->insertUser($data);
+
+            echo json_encode([
+                'status' => $insert ? true : false,
+                'message' => $insert ? 'User berhasil ditambahkan' : 'Gagal menambahkan user',
+                'id' => $insert ? $this->db->insert_id() : null,
+                'username' => $username,
+                'password' => $password
+            ]);
         }
-
-        $data = ['username' => $username, 'password' => $password];
-        $insert = $this->User_model->insertUser($data);
-
-        echo json_encode([
-            'status' => $insert ? true : false,
-            'message' => $insert ? 'User berhasil ditambahkan' : 'Gagal menambahkan user'
-        ]);
     }
 
-    public function edit($id = null){
+    public function edit($id = null)
+    {
         $userId = $this->session->userdata('user_id');
         
         // Mengecek jika yang ingin diedit adalah akun pengguna yang sedang login
@@ -82,7 +101,8 @@ class Dashboard extends CI_Controller
         $this->load->view('view_edit_user', $data);
     }
 
-    public function update_user(){
+    public function update_user()
+    {
         $id = $this->input->post('id');
         $username = $this->input->post('username');
         $password = $this->input->post('password');
@@ -103,8 +123,8 @@ class Dashboard extends CI_Controller
         redirect('dashboard');
     }
 
-
-    public function delete($id = null){
+    public function delete($id = null)
+    {
         $userId = $this->session->userdata('user_id');
         
         // Mengecek jika yang ingin dihapus adalah akun pengguna yang sedang login
