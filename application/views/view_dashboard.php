@@ -18,11 +18,14 @@
                 <?php if ($this->session->flashdata('notification')): ?>
                     <div class="alert alert-info"><?= $this->session->flashdata('notification'); ?></div>
                 <?php endif; ?>
-
+                
                 <div class="">
                     <a href="<?= base_url('dashboard/add'); ?>" class="btn btn-primary">Tambah User</a>
-                </div>
+                    <!-- Tombol Logout -->
+                    <a href="<?= base_url('login/logout'); ?>" class="btn btn-danger">Logout</a>
 
+                </div>
+                
                 <div class="table-user">
                     <table class="table table-striped">
                         <thead>
@@ -34,24 +37,66 @@
                             </tr>
                         </thead>
                         <tbody id="userTableBody">
-                            <?php
-                            $no = 1;
-                            foreach ($users as $user) :
-                            ?>
-                                <tr>
-                                    <td><?= $no++ ?></td>
-                                    <td><?= $user->username ?></td>
-                                    <td><?= $user->password ?></td>
-                                    <td>
-                                        <a href="<?= base_url('dashboard/edit/' . $user->id); ?>" class="btn btn-primary">Edit</a>
+                        <?php
+                        $no = 1;
+                        foreach ($users as $user) :
+                        ?>
+                            <tr>
+                                <td><?= $no++ ?></td>
+                                <td><?= $user->username ?></td>
+                                <td><?= $user->password ?></td>
+                                <td>
+                                    <?php if ($this->session->userdata('user_id') == $user->id): ?>
+                                        <button type="button" class="btn btn-secondary" disabled>Edit</button>
+                                        <button type="button" class="btn btn-secondary" disabled>Delete</button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn btn-primary" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editUserModal" 
+                                                data-id="<?= $user->id ?>" 
+                                                data-username="<?= $user->username ?>" 
+                                                data-password="<?= $user->password ?>">
+                                            Edit
+                                        </button>
                                         <a href="<?= base_url('dashboard/delete/' . $user->id); ?>" class="btn btn-danger">Delete</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
+                            
+                <!-- Modal untuk Edit User -->
+                <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="editUserModalLabel">Edit User</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="formEditUser" action="<?= base_url('dashboard/update_user'); ?>" method="post">
+                                    <input type="hidden" name="id" id="editUserId">
+                                    <div class="mb-3">
+                                        <label for="editUsername" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="editUsername" name="username">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="editPassword" name="password">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 
@@ -92,6 +137,21 @@
                 }
             });
         });
+
+        // Ketika tombol Edit ditekan
+        var editUserModal = document.getElementById('editUserModal');
+        editUserModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget; // Tombol yang ditekan
+            var id = button.getAttribute('data-id');
+            var username = button.getAttribute('data-username');
+            var password = button.getAttribute('data-password');
+
+            // Masukkan data ke dalam input form
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editPassword').value = password;
+        });
+
     </script>
 </body>
 

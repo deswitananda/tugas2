@@ -63,7 +63,7 @@ class Dashboard extends CI_Controller
 
         echo json_encode([
             'status' => $insert ? true : false,
-            'message' => $insert ? 'Pengguna berhasil ditambahkan' : 'Gagal menambahkan pengguna'
+            'message' => $insert ? 'User berhasil ditambahkan' : 'Gagal menambahkan user'
         ]);
     }
 
@@ -82,26 +82,27 @@ class Dashboard extends CI_Controller
         $this->load->view('view_edit_user', $data);
     }
 
-    public function update_user()
-    {
+    public function update_user(){
         $id = $this->input->post('id');
         $username = $this->input->post('username');
         $password = $this->input->post('password');
 
-        $data = array(
+        $data = [
             'username' => $username,
-            'password' => $password
-        );
+            'password' => $password,
+        ];
 
         $update = $this->User_model->updateUser($id, $data);
 
         if ($update) {
-            redirect('dashboard', 'refresh');
+            $this->session->set_flashdata('notification', 'Data berhasil diperbarui!');
         } else {
-            $this->session->set_flashdata('update_error', 'Data gagal diperbarui');
-            redirect('dashboard/edit/' . $id, 'refresh');
+            $this->session->set_flashdata('notification', 'Data gagal diperbarui!');
         }
+
+        redirect('dashboard');
     }
+
 
     public function delete($id = null){
         $userId = $this->session->userdata('user_id');

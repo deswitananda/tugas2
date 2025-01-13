@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') or exit('Akses langsung tidak diperbolehkan');
+defined('BASEPATH') or exit('No direct scirpt access allowed');
 
 class Login extends CI_Controller
 {
@@ -37,6 +37,16 @@ class Login extends CI_Controller
             $this->session->set_flashdata('error', 'Username atau password salah');
             redirect('login');
         }
+    }
+
+    // Fungsi untuk logout
+    public function logout()
+    {
+        // Hapus session pengguna
+        $this->session->sess_destroy();
+
+        // Arahkan ke halaman login
+        redirect('login');
     }
 }
 ?>
